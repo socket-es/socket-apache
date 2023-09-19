@@ -192,6 +192,8 @@ LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %T %v" f
 
 LogFormat "%v:%p %h %l %u %t \"%r\" %>s %O \"%{Referer}i\" \"%{User-Agent}i\"" vhost_combined
 
+{{ apache_log_format_addons }}
+
 # Include generic snippets of statements
 IncludeOptional conf-enabled/*.conf
 

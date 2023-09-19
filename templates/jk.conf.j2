@@ -26,7 +26,7 @@
     JkLogFile /var/log/apache2/mod_jk.log
 
     # Our JK log level (trace,debug,info,warn,error)
-    JkLogLevel info
+    JkLogLevel {{ apache_mod_jk_log_level }}
 
     # Our JK shared memory file
     JkShmFile /var/log/apache2/jk-runtime-status
@@ -115,5 +115,7 @@
     # - can copy all global mounts to all virtual hosts by putting
     #   "JkMountCopy All" into the global server
     # Since: 1.2.26
+
+    {{ apache_mod_jk_addons }}
 
 </IfModule>
