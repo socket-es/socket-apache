@@ -214,7 +214,6 @@ If you would like to only create SSL vhosts when the vhost certificate is presen
 
 If you require Basic Auth support, you can add it either through a custom template, or by adding `extra_parameters` to a VirtualHost configuration, like so:
 
-
     extra_parameterl: |
       <Directory "/var/www/password-protected-directory">
         Require valid-user
