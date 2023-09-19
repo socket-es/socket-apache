@@ -1,0 +1,15 @@
+---
+- name: Update apt cache.
+  apt: update_cache=yes cache_valid_time=3600
+
+- name: Ensure Apache is installed on Debian.
+  apt: "name={{ apache_packages }} state={{ apache_packages_state }}"
+
+- name: Ensure mod_perl is installed.
+  apt: "name={{ apache_perl_packages }} state={{ apache_perl_packages_state }}"
+
+- name: Ensure mod_security is installed.
+  apt: "name={{ apache_mod_security_packages }} state={{ apache_mod_security_packages_state }}"
+
+- name: Ensure mod_jk is installed.
+  apt: "name={{ apache_mod_jk_packages }} state={{ apache_mod_jk_packages_state }}"

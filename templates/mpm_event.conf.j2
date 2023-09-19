@@ -1,0 +1,18 @@
+# event MPM
+# StartServers: initial number of server processes to start
+# MinSpareThreads: minimum number of worker threads which are kept spare
+# MaxSpareThreads: maximum number of worker threads which are kept spare
+# ThreadsPerChild: constant number of worker threads in each server process
+# MaxRequestWorkers: maximum number of worker threads
+# MaxConnectionsPerChild: maximum number of requests a server process serves
+<IfModule mpm_event_module>
+        StartServers    {{ mpm_event_start_servers }}
+        MinSpareThreads {{ mpm_event_min_spare_threads }}
+        MaxSpareThreads {{ mpm_event_max_spare_threads }}
+        ThreadLimit     {{ mpm_event_thread_limit }}
+        ThreadsPerChild {{ mpm_event_threads_per_child }}
+        MaxRequestWorkers       {{ mpm_event_max_request_workers }}
+        MaxConnectionsPerChild  {{ mpm_event_max_connections_per_child }}
+</IfModule>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

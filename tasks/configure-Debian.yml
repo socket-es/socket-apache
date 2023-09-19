@@ -1,0 +1,169 @@
+---
+- name: Set apache global configuration.
+  template:
+    src: "apache2.conf.j2"
+    dest: "{{ apache_server_root }}/apache2.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+
+- name: Set apache ports configuration.
+  template:
+    src: "ports.conf.j2"
+    dest: "{{ apache_server_root }}/ports.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+
+- name: Set apache envvars configuration.
+  template:
+    src: "envvars.j2"
+    dest: "{{ apache_server_root }}/envvars"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+
+- name: Set security.conf configuration.
+  template:
+    src: "security.conf.j2"
+    dest: "{{ apache_server_root }}/conf-available/security.conf"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart apache
+
+- name: Enable Apache conf.
+  file:
+    src: "{{ apache_server_root }}/conf-available/{{ item }}.conf"
+    dest: "{{ apache_server_root }}/conf-enabled/{{ item }}.conf"
+    state: link
+    mode: 0644
+  with_items: "{{ apache_confs_enabled }}"
+  notify: restart apache
+
+- name: Disable Apache conf.
+  file:
+    path: "{{ apache_server_root }}/conf-enabled/{{ item }}.conf"
+    state: absent
+  with_items: "{{ apache_confs_disabled }}"
+  notify: restart apache
+
+- name: Set enabled mod mpm configs.
+  template:
+    src: "mpm_{{ item }}.conf.j2"
+    dest: "{{ apache_server_root }}/mods-available/mpm_{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_mpm_module }}"
+  notify: restart apache
+
+- name: Copy confs for apache mods.
+  copy:
+    src: "{{ item }}.conf"
+    dest: "{{ apache_server_root }}/mods-available/{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_conf_mods_files }}"
+  notify: restart apache
+
+- name: Set confs for apache mods templates.
+  template:
+    src: "{{ item }}.conf.j2"
+    dest: "{{ apache_server_root }}/conf-available/{{ item }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_conf_mods_files_tpl }}"
+  notify: restart apache
+
+- name: Enable Apache mods.
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ apache_mods_ena }}"
+  notify: restart apache
+
+- name: disable Apache mods.
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items: "{{ apache_mods_dis }}"
+  notify: restart apache
+
+- name: Remove default vhost in sites-enabled.
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ apache_conf_path }}/sites-available/{{ apache_default_vhost_filename }}"
+    - "{{ apache_conf_path }}/sites-enabled/{{ apache_default_vhost_filename }}"
+  notify: restart apache
+  when: apache_remove_default_vhost | bool
+
+- name: Check whether certificates defined in vhosts exist.
+  stat: "path={{ item.certificate_file }}"
+  register: apache_ssl_certificates
+  with_items: "{{ apache_vhosts_ssl }}"
+
+- name: Ansible create document Root directories
+  file:
+    path: "{{ item.documentroot }}"
+    owner: "{{ item.apache_vhost_user }}"
+    group: "{{ item.apache_vhost_group }}"
+    state: directory
+  with_items: "{{ apache_vhosts }}"
+
+- name: Add apache vhosts configuration.
+  template:
+    src: "{{ apache_vhosts_template }}"
+    dest: "{{ apache_conf_path }}/sites-available/{{ item.priority }}-{{ item.servername }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_vhosts }}"
+  notify: restart apache
+  when: apache_create_vhosts | bool
+
+- name: Add vhost symlink in sites-enabled.
+  file:
+    src: "{{ apache_conf_path }}/sites-available/{{ item.priority }}-{{ item.servername }}.conf"
+    dest: "{{ apache_conf_path }}/sites-enabled/{{ item.priority }}-{{ item.servername }}.conf"
+    state: link
+    mode: 0644
+  with_items: "{{ apache_vhosts }}"
+  notify: restart apache
+  when: apache_create_vhosts | bool
+
+- name: Ansible create document Root directories ssl
+  file:
+    path: "{{ item.documentroot }}"
+    owner: "{{ item.apache_vhost_user }}"
+    group: "{{ item.apache_vhost_group }}"
+    state: directory
+  with_items: "{{ apache_vhosts_ssl }}"
+
+- name: Add apache vhosts ssl configuration.
+  template:
+    src: "{{ apache_vhosts_ssl_template }}"
+    dest: "{{ apache_conf_path }}/sites-available/{{ item.priority }}-ssl-{{ item.servername }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ apache_vhosts_ssl }}"
+  notify: restart apache
+  when: apache_create_vhosts | bool
+
+- name: Add vhost symlink in ssl sites-enabled.
+  file:
+    src: "{{ apache_conf_path }}/sites-available/{{ item.priority }}-ssl-{{ item.servername }}.conf"
+    dest: "{{ apache_conf_path }}/sites-enabled/{{ item.priority }}-ssl-{{ item.servername }}.conf"
+    state: link
+    mode: 0644
+  with_items: "{{ apache_vhosts_ssl }}"
+  notify: restart apache
+  when: apache_create_vhosts | bool

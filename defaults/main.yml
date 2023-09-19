@@ -1,0 +1,141 @@
+---
+apache_listen_ip: "*"
+apache_listen_port: 80
+apache_listen_port_ssl: 443
+apache_server_tokens: "Prod"
+apache_run_user: "www-data"
+apache_run_group: "www-data"
+apache_timeout: 300
+apache_keepalive: "On"
+apache_max_keep_alive_requests: 100
+apache_keep_alive_timeout: 5
+apache_log_dir: "/var/log/apache2"
+apache_log_level: "warn"
+apache_directory_index: "index.html index.cgi index.pl index.php index.xhtml index.htm"
+apache_proxy_conf: False
+apache_proxy_requests: "Off"
+apache_proxy_timeout: 120
+apache_ssl_cipher_suite: "ECDHE-RSA-DES-CBC3-SHA:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-DSS-AES128-SHA256:DHE-DSS-AES256-SHA:!AES128-GCM-SHA256:!AES256-GCM-SHA384:!AES128-SHA:!AES256-SHA:AES:!CAMELLIA:!DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA:!DHE-RSA-AES128-GCM-SHA256:!DHE-RSA-AES256-GCM-SHA384:!DHE-RSA-AES128-SHA256:!DHE-RSA-AES256-SHA:!DHE-RSA-AES128-SHA:!DHE-RSA-AES256-SHA256:!DHE-RSA-CAMELLIA128-SHA:!DHE-RSA-CAMELLIA256-SHA:!CAMELLIA128-SHA:!CAMELLIA256-SHA:!AES256-SHA256:!AES128-SHA256"
+apache_ssl_protocol: "all -SSLv2 -SSLv3 -TLSv1 -TLSv1.1"
+apache_ssl_options: False
+
+apache_status_ips:
+  - 127.0.0.1
+
+# Used on Debian/Ubuntu.
+apache_confs_enabled:
+  - charset
+  - localized-error-pages
+  - other-vhosts-access-log
+  - security
+apache_confs_disabled:
+  - serve-cgi-bin
+
+apache_mpm_module:
+  - prefork
+  - event
+  - worker
+
+mpm_event_start_servers: 2
+mpm_event_min_spare_threads: 25
+mpm_event_max_spare_threads: 75
+mpm_event_thread_limit: 64
+mpm_event_threads_per_child: 25
+mpm_event_max_request_workers: 150
+mpm_event_max_connections_per_child: 0
+
+mpm_prefork_start_servers: 5
+mpm_prefork_min_spare_servers: 5
+mpm_prefork_max_spare_servers: 10
+mpm_prefork_max_request_workers: 150
+mpm_prefork_max_connections_per_child: 0
+
+mpm_worker_start_servers: 2
+mpm_worker_min_spare_threads: 25
+mpm_worker_max_spare_threads: 75
+mpm_worker_thread_limit: 64
+mpm_worker_threads_per_child: 25
+mpm_worker_max_request_workers: 150
+mpm_worker_max_connections_per_child: 0 
+
+apache_conf_mods_files:
+  - deflate
+  - expires
+  - setenvif
+
+apache_conf_mods_files_tpl:
+  - dir
+  - proxy
+  - status
+  - ssl
+
+# Only used on Debian/Ubuntu.
+apache_mods_ena:
+  - access_compat
+  - alias
+  - auth_basic
+  - authn_core
+  - authn_file
+  - authz_core
+  - authz_host
+  - authz_user
+  - autoindex
+  - deflate
+  - dir
+  - env
+  - filter
+  - mime
+  - mpm_event
+  - negotiation
+  - reqtimeout
+  - setenvif
+  - status
+
+apache_mods_dis: []
+
+apache_create_vhosts: true
+apache_vhosts_template: "vhosts.conf.j2"
+apache_vhosts_ssl_template: "ssl-vhosts.conf.j2"
+
+# On Debian/Ubuntu, a default virtualhost is included in Apache's configuration.
+# Set this to `false` to ensure that default.
+apache_remove_default_vhost: true
+
+apache_vhosts:
+  # Additional properties:
+  # 'serveradmin, serveralias, allow_override, options, extra_parameters'.
+  - servername: "local.dev"
+    listen_ip: "*"
+    documentroot: "/var/www/html"
+    priority: "00"
+    wp: "0"
+    apache_vhost_user: "www-data"
+    apache_vhost_group: "www-data"
+    apache_php_fpm_backend: "0"
+    apache_security_headers: "0"
+    apache_interest_cohort: "0"
+    customlog: "1"
+    typelog: "combined"
+
+apache_allow_override: "All"
+apache_options: "-Indexes +FollowSymLinks"
+
+apache_vhosts_ssl: []
+
+apache_ignore_missing_ssl_certificate: true
+
+# Set initial apache state. Recommended values: `started` or `stopped`
+apache_state: started
+
+# Set initial apache service status. Recommended values: `yes` or `no`
+apache_enabled: yes
+
+# Set apache state when configuration changes are made. Recommended values:
+# `restarted` or `reloaded`
+apache_restart_state: restarted
+
+# Apache packages and modules state; use `present` to make sure it's installed, or `latest`
+apache_packages_state: present
+apache_perl_packages_state: absent
+apache_mod_security_packages_state: absent
+apache_mod_jk_packages_state: absent

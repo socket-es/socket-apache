@@ -1,0 +1,102 @@
+{# Set up SSL VirtualHosts #}
+{% if apache_ignore_missing_ssl_certificate or apache_ssl_certificates.results[loop.index0].stat.exists %}
+<VirtualHost {{ item.listen_ip_ssl }}>
+  SSLEngine on
+  SSLCompression off
+  SSLCertificateFile {{ item.certificate_file }}
+  SSLCertificateKeyFile {{ item.certificate_key_file }}
+{% if item.certificate_chain_file is defined %}
+  SSLCertificateChainFile {{ item.certificate_chain_file }}
+{% endif %}
+
+  ServerName {{ item.servername }}
+{% if item.serveralias is defined %}
+        {% for alias in item.serveralias %}
+  ServerAlias {{ alias }}
+        {% endfor %}
+{% endif %}
+{% if item.serveradmin is defined %}
+  ServerAdmin {{ item.serveradmin }}
+{% endif %}
+{% if item.protocols is defined %}
+  Protocols {{ item.protocols }}
+{% endif %}
+{% if item.rewrite is defined %}
+  RewriteEngine On
+  {% for item,value in item.rewrite.items() %}
+  #To principal DOM
+  RewriteCond %{HTTP_HOST} ^{{ value.rewritecond }}$
+  RewriteRule ^(.*)$ {{ value.proto }}{{ value.rewriterule }}$1 [R=301]
+  {% endfor %}
+{% endif %}
+{% if item.documentroot is defined %}
+  DocumentRoot "{{ item.documentroot }}"
+{% endif %}
+
+{% if item.documentroot is defined %}
+  <Directory "{{ item.documentroot }}">
+    AllowOverride {{ item.allow_override | default(apache_allow_override) }}
+    Options {{ item.options | default(apache_options) }}
+    DirectoryIndex {{ apache_directory_index }}
+    Require all granted
+  {% if item.fallbackresource is defined %}
+    FallbackResource {{ item.fallbackresource }}
+  {% endif %}
+  </Directory>
+{% endif %}
+
+{% if item.wp == "1" %}
+  <Directory "{{ item.documentroot }}/wp-admin/">
+    AllowOverride {{ item.allow_override | default(apache_allow_override) }}
+    Options {{ item.options | default(apache_options) }}
+    DirectoryIndex {{ apache_directory_index }}
+    Require all granted
+        {% if item.fallbackresource is defined %}
+    FallbackResource {{ item.fallbackresource }}
+        {% endif %}
+  </Directory>
+  ## Denied xmlrpc WP
+  <Files xmlrpc.php>
+    Require all denied
+  </Files>
+{% endif %}
+
+{% if item.apache_php_fpm_backend == "1" %}
+  ## Proxy rules
+  ProxyRequests Off
+  ProxyPreserveHost Off
+  ProxyPassMatch ^/(.*\.php(/.*)?)$ fcgi://{{ item.serverbackend }}:{{ item.apache_server_backend_port }}{{ item.documentroot }}/$1 retry=0
+  ProxyPassReverse ^/(.*\.php(/.*)?)$ fcgi://{{ item.serverbackend }}:{{ item.apache_server_backend_port }}{{ item.documentroot }}/$1
+{% endif %}
+
+{% if item.reverseproxy is defined %}
+  ## Proxy rules
+  ProxyRequests Off 
+  ProxyPreserveHost Off
+  SetOutputFilter proxy-html
+  ProxyPass "/" "{{ item.serverbackendip }}/" retry=0
+  ProxyPassReverse "/" "{{ item.serverbackendip }}/"
+{% endif %}
+
+{% if item.apache_security_headers == "1" %}
+  Header always add Strict-Transport-Security "max-age=15768000; includeSubDomains; preload"
+  Header always Set X-Frame-Options "SAMEORIGIN"
+  Header always Set X-Content-Type-Options "nosniff"
+{% endif %}
+
+{% if item.apache_interest_cohort == "1" %}
+  Header always Set Permissions-Policy: interest-cohort=()
+{% endif %}
+
+{% if item.extra_parameters is defined %}
+{{ item.extra_parameters | indent(width=2, first=True) }}
+{% endif %}
+{% if item.customlog == "1" %}
+  ErrorLog "/var/log/apache2/{{ item.servername }}_error.log"
+  CustomLog "/var/log/apache2/{{ item.servername }}_access.log" "{{ item.typelog }}" 
+{% else %}
+  ErrorLog "{{ item.logpath }}{{ item.servername }}_error.log"
+  CustomLog "{{ item.logpath }}{{ item.servername }}_access.log" "{{ item.typelog }}"
+{% endif %}
+</VirtualHost>
+{% endif %}

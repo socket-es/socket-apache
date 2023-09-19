@@ -1,0 +1,44 @@
+- name: Enable Apache rewrite if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "rewrite"
+  when: item.rewrite is defined
+  with_items: "{{ apache_vhosts }}"
+  notify: restart apache
+
+- name: Enable Apache proxy if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "proxy_fcgi"
+  when: item.apache_php_fpm_backend == "1"
+  with_items: "{{ apache_vhosts }}"
+  notify: restart apache
+
+- name: Enable Apache headers if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "headers"
+  when: item.apache_security_headers == "1"
+  with_items: "{{ apache_vhosts }}"
+  notify: restart apache
+
+- name: Enable Apache mod_perl if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "perl"
+  when: apache_perl_packages_state == "present"
+  notify: restart apache
+
+- name: Enable Apache mod_security if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "security2"
+  when: apache_mod_security_packages_state == "present"
+  notify: restart apache
+
+- name: Enable Apache mod_jk if necesary.
+  community.general.apache2_module:
+    state: present
+    name: "jk"
+  when: apache_mod_jk_packages_state == "present"
+  notify: restart apache
