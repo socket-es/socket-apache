@@ -76,7 +76,7 @@ Security config for Apache Status & Info pages, default access to localhost. Wri
     apache_confs_disabled:
       - serve-cgi-bin
 
-List of Apache configs enabled or disabled by default.
+List of Apache configs enabled or disabled by default only one is posible.
 
     apache_mpm_module:
       - prefork
@@ -149,7 +149,7 @@ You can add or override global Apache configuration settings in the role-provide
       - servername: "local.dev"
         documentroot: "/var/www/html"
 
-Add a set of properties per virtualhost, including `servername` (required), `documentroot` (required), `priority` (required), `apache_vhost_user` (required), `apache_vhost_group` (required), `apache_php_fpm_backend` (required), `apache_security_headers` (required), `listen_ip` (required), `wp` (required), `apache_interest_cohort` (required), `customlog` (required), `logpath` (required), `allow_override` (optional: defaults to the value of `apache_allow_override`), `options` (optional: defaults to the value of `apache_options`), `serveradmin` (optional), `serveralias` (optional) and `extra_parameters` (optional: you can add whatever additional configuration lines you'd like in here).
+Add a set of properties per virtualhost, including `servername` (required), `documentroot` (required), `priority` (required), `apache_vhost_user` (required), `apache_vhost_group` (required), `apache_php_fpm_backend` (required), `apache_security_headers` (required), `listen_ip` (required), `listen_port` (required), `wp` (required), `apache_interest_cohort` (required), `customlog` (required), `logpath` (required), `allow_override` (optional: defaults to the value of `apache_allow_override`), `options` (optional: defaults to the value of `apache_options`), `serveradmin` (optional), `serveralias` (optional) and `extra_parameters` (optional: you can add whatever additional configuration lines you'd like in here).
 
 Here's an example using `extra_parameters` to add a RewriteRule to redirect all requests to the `www.` site:
 
@@ -171,6 +171,10 @@ Here's an example using `extra_parameters` to add a RewriteRule to redirect all 
           RewriteRule ^(.*)$ http://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 The `|` denotes a multiline scalar block in YAML, so newlines are preserved in the resulting configuration file output.
+
+If extra parameters is a large multiline whith comments, write it inside a file and use this config:
+
+    extra_parameters: "{{lookup('file', 'pathtofile/extra_parameters_file')}}"
 
     apache_vhosts_ssl: []
 
@@ -214,7 +218,7 @@ If you would like to only create SSL vhosts when the vhost certificate is presen
 
 If you require Basic Auth support, you can add it either through a custom template, or by adding `extra_parameters` to a VirtualHost configuration, like so:
 
-    extra_parameterl: |
+    extra_parameters: |
       <Directory "/var/www/password-protected-directory">
         Require valid-user
         AuthType Basic
@@ -231,6 +235,28 @@ To password protect everything within a VirtualHost directive, use the `Location
 
 You would need to generate/upload your own `.htpasswd` file in your own playbook. There may be other roles that support this functionality in a more integrated way.
 
+## mod_jk default configs
+
+If you require mod_jk module in apache, you need to install:
+
+**apache_mod_jk_packages_state**: present
+
+There are two files for configuration, jk.conf and jk_workers_file whith these parameters:
+
+**apache_mod_jk_log_level** (info, warn ...).
+
+**apache_mod_jk_status** disabled by default.
+
+**apache_mod_jk_addons** if you need extra configuration. 
+
+And workers file for mod_jk functions, **jk_workers_file** the selected personalized name for this file.
+
+**apache_mod_jk_workers_tomcat_home** normally /usr/share/tomcat9
+
+**apache_mod_jk_worker_port** 8009 by default. 
+
+**apache_mod_jk_worker_socket_timeout** 60 by default.
+
 ## Dependencies
 
 None.
@@ -241,7 +267,7 @@ None.
       vars_files:
         - vars/main.yml
       roles:
-        - { role: socket.apache }
+        - { role: socket_es.apache }
 
 *Inside `vars/main.yml`*:
 
