@@ -6,6 +6,7 @@
 # Set to one of:  Full | OS | Minimal | Minor | Major | Prod
 # where Full conveys the most information, and Prod the least.
 ServerTokens {{ apache_server_tokens }}
+ServerSignature Off
 
 #
 # Allow TRACE method
@@ -29,4 +30,12 @@ TraceEnable Off
 <DirectoryMatch "/\.git">
    Require all denied
 </DirectoryMatch>
+
+<Files .svn>
+   Require all denied
+</Files>
+
+<Files .git>
+   Require all denied
+</Files>
 
