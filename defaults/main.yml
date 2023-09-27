@@ -107,6 +107,7 @@ apache_vhosts:
   # 'serveradmin, serveralias, allow_override, options, extra_parameters'.
   - servername: "local.dev"
     listen_ip: "*"
+    listen_port: "80"
     documentroot: "/var/www/html"
     priority: "00"
     wp: "0"
@@ -140,5 +141,8 @@ apache_packages_state: present
 apache_perl_packages_state: absent
 apache_mod_security_packages_state: absent
 apache_mod_jk_packages_state: absent
+apache_mod_jk_workers_tomcat_home: "/usr/share/tomcat9"
 apache_mod_jk_log_level: "info"
 apache_mod_jk_addons:
+apache_mod_jk_worker_port: "8009"
+apache_mod_jk_worker_socket_timeout: "60"

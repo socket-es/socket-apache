@@ -42,7 +42,22 @@
   include_vars: apache-24.yml
   when: "apache_version.split('.')[1] == '4'"
 
-# Configure Apache.
+# Figure out what mpm module of Apache is enabled.
+- name: Get enabled mod_mpm of Apache.
+  shell: /usr/sbin/apachectl -V | /usr/bin/grep -i mpm | /bin/awk '{print $3}'
+  changed_when: false
+  check_mode: false
+  register: _apache_modmpm_ena
+
+- name: Create apache_mpm_ena variable.
+  set_fact:
+    apache_mpm_ena: "{{ _apache_modmpm_ena }}"
+
+# Disable Apache Mods mpm
+- name: Disable Apache Mods mpm
+  include_tasks: "disable.yml"
+
+# Configure Apache mods.
 - name: Configure Apache mods.
   include_tasks: "mods-{{ ansible_os_family }}.yml"
 

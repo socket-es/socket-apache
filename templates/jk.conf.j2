@@ -59,7 +59,7 @@
     # Since: 1.2.27
     JkWatchdogInterval 60
 
-    {% if mod_jk_status is defined %}
+    {% if apache_mod_jk_status is defined %}
     # Configure access to jk-status and jk-manager
     # If you want to make this available in a virtual host,
     # either move this block into the virtual host
@@ -71,11 +71,11 @@
         JkMount jk-status
         Require ip 127.0.0.1
     </Location>
-    <Location /jk-manager>
+    #<Location /jk-manager>
         # Inside Location we can omit the URL in JkMount
-        JkMount jk-manager
-        Require ip 127.0.0.1
-    </Location>
+    #    JkMount jk-manager
+    #    Require ip 127.0.0.1
+    #</Location>
     {% endif %}
 
     # If you want to put all mounts into an external file

@@ -1,0 +1,16 @@
+- name: disable Apache mods mpm.
+  community.general.apache2_module:
+    state: absent
+    name: "mpm_{{ item }}"
+    ignore_configcheck: true
+  with_items: "{{ apache_mpm_ena.stdout }}"
+  when: apache_mpm_ena.stdout != apache_mpm_module
+
+- name: Enable Apache mods mpm.
+  community.general.apache2_module:
+    state: present
+    name: "mpm_{{ item }}"
+    ignore_configcheck: true
+  with_items: "{{ apache_mpm_module }}"
+  when: apache_mpm_ena.stdout != apache_mpm_module
+  notify: restart apache

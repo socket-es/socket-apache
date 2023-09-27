@@ -71,6 +71,26 @@
   with_items: "{{ apache_conf_mods_files }}"
   notify: restart apache
 
+- name: Set conf for apache mod_jk.
+  template:
+    src: "jk.conf.j2"
+    dest: "{{ apache_server_root }}/mods-available/jk.conf"
+    owner: root
+    group: root
+    mode: 0644
+  when: apache_mod_jk_packages_state == "present"
+  notify: restart apache
+
+- name: Set Workers.properties file for mod_jk.
+  template:
+    src: "jk_workers_file.j2"
+    dest: "{{ apache_server_root }}/{{ jk_workers_file }}"
+    owner: root
+    group: root
+    mode: 0644
+  when: apache_mod_jk_packages_state == "present"
+  notify: restart apache
+
 - name: Set confs for apache mods templates.
   template:
     src: "{{ item }}.conf.j2"
@@ -90,7 +110,7 @@
 
 - name: disable Apache mods.
   community.general.apache2_module:
-    state: present
+    state: absent
     name: "{{ item }}"
   with_items: "{{ apache_mods_dis }}"
   notify: restart apache

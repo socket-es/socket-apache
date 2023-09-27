@@ -7,8 +7,8 @@
 
 <IfModule mpm_prefork_module>
         StartServers    {{ mpm_prefork_start_servers }}
-        MinSpareThreads {{ mpm_prefork_min_spare_servers }}
-        MaxSpareThreads {{ mpm_prefork_max_spare_servers }}
+        MinSpareServers {{ mpm_prefork_min_spare_servers }}
+        MaxSpareServers {{ mpm_prefork_max_spare_servers }}
         MaxRequestWorkers     {{ mpm_prefork_max_request_workers }}
         MaxConnectionsPerChild  {{ mpm_prefork_max_connections_per_child }}
 </IfModule>
