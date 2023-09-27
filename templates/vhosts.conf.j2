@@ -1,5 +1,5 @@
 {# Set up VirtualHosts #}
-<VirtualHost {{ item.listen_ip }}>
+<VirtualHost {{ item.listen_ip }}:{{ item.listen_port }}>
   ServerName {{ item.servername }}
 {% if item.serveralias is defined %}
         {% for alias in item.serveralias %}
@@ -33,7 +33,7 @@
   {% if item.fallbackresource is defined %}
     FallbackResource {{ item.fallbackresource }}
   {% endif %}
-  </Directory>
+</Directory>
 {% endif %}
 
 {% if item.wp == "1" %}

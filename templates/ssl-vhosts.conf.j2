@@ -1,6 +1,6 @@
 {# Set up SSL VirtualHosts #}
 {% if apache_ignore_missing_ssl_certificate or apache_ssl_certificates.results[loop.index0].stat.exists %}
-<VirtualHost {{ item.listen_ip_ssl }}>
+<VirtualHost {{ item.listen_ip_ssl }}:{{ item.listen_port_ssl }}>
   SSLEngine on
   SSLCompression off
   SSLCertificateFile {{ item.certificate_file }}
